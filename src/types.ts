@@ -55,7 +55,9 @@ export interface ParetoPoint {
   monthlyCost: number
   passRate: number
   latencyMs: number
+  utility: number
   selected: boolean
+  onFrontier: boolean
 }
 
 export interface RoutingResult {

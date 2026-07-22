@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MODEL_CATALOG } from '../data/models'
+import { normalizePriorities } from './priorities'
 import { forecastPortfolio, optimizeRoute } from './router'
 import type { RoutingInput } from '../types'
 
@@ -13,6 +14,21 @@ const baseInput: RoutingInput = {
   passRateFloor: 0.8,
   priorities: { quality: 50, cost: 30, speed: 20 },
 }
+
+describe('normalizePriorities', () => {
+  it('returns the effective mix used by the optimizer', () => {
+    expect(normalizePriorities({ quality: 60, cost: 30, speed: 20 })).toEqual({
+      quality: 60 / 110,
+      cost: 30 / 110,
+      speed: 20 / 110,
+    })
+    expect(normalizePriorities({ quality: 0, cost: 0, speed: 0 })).toEqual({
+      quality: 0,
+      cost: 0,
+      speed: 0,
+    })
+  })
+})
 
 describe('forecastPortfolio', () => {
   it('calculates token cost and weighted operating metrics', () => {
@@ -44,19 +60,60 @@ describe('optimizeRoute', () => {
     expect(first.evidence.length).toBeGreaterThanOrEqual(first.allocations.length)
   })
 
-  it('changes the recommendation when quality dominates the decision', () => {
+  it('changes the recommendation when only the decision priorities change', () => {
     const balanced = optimizeRoute(baseInput, MODEL_CATALOG)
     const qualityFirst = optimizeRoute(
       {
         ...baseInput,
-        monthlyBudget: 2_000,
-        priorities: { quality: 90, cost: 5, speed: 5 },
+        priorities: { quality: 100, cost: 0, speed: 0 },
       },
       MODEL_CATALOG,
     )
 
     expect(qualityFirst.forecast.passRate).toBeGreaterThanOrEqual(balanced.forecast.passRate)
     expect(qualityFirst.allocations).not.toEqual(balanced.allocations)
+  })
+
+  it('plots a latency-first selected route even when it is off the cost-quality frontier', () => {
+    const passRates = { support: 0.9, research: 0.9, coding: 0.9, extraction: 0.9 }
+    const result = optimizeRoute(
+      {
+        ...baseInput,
+        monthlyBudget: 10_000,
+        passRateFloor: 0.7,
+        priorities: { quality: 0, cost: 0, speed: 100 },
+      },
+      [
+        {
+          id: 'slow-efficient',
+          name: 'Slow Efficient',
+          provider: 'Provider A',
+          tier: 'balanced',
+          inputPricePerMillion: 1,
+          outputPricePerMillion: 1,
+          latencyMs: 1_000,
+          passRates,
+          evidence: 'Synthetic test fixture',
+          measuredAt: '2026-07-22',
+        },
+        {
+          id: 'fast-dominated',
+          name: 'Fast Dominated',
+          provider: 'Provider B',
+          tier: 'fast',
+          inputPricePerMillion: 2,
+          outputPricePerMillion: 2,
+          latencyMs: 100,
+          passRates: { ...passRates, support: 0.8 },
+          evidence: 'Synthetic test fixture',
+          measuredAt: '2026-07-22',
+        },
+      ],
+    )
+
+    expect(result.allocations).toEqual([{ modelId: 'fast-dominated', weight: 1 }])
+    expect(result.paretoFrontier.filter((point) => point.selected)).toHaveLength(1)
+    expect(result.paretoFrontier.find((point) => point.selected)?.onFrontier).toBe(false)
   })
 
   it('returns the closest portfolio and quantified violations for impossible constraints', () => {
