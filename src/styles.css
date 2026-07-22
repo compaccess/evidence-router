@@ -24,6 +24,7 @@ h3 { font-size: 14px; letter-spacing: -0.015em; }
 .field, .priorities { display: block; border: 0; padding: 0; margin: 0 0 18px; }
 .field-index { display: block; font-weight: 700; font-size: 12px; margin-bottom: 4px; }
 .field-help { display: block; font-size: 10px; color: var(--muted); margin-bottom: 6px; }
+.word-estimate-note { margin: 7px 0 0; line-height: 1.35; }
 .field input, .field textarea, .field select, .paired-inputs input { width: 100%; border: 1px solid #9097a2; border-radius: 3px; background: #fff; padding: 9px 10px; font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, monospace; color: #16181d; }
 .field textarea { resize: vertical; min-height: 68px; }
 .paired-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react'
 import type { RoutingInput, Workflow } from '../types'
 import { PRESETS } from '../data/presets'
+import { WORD_USAGE_ESTIMATE_NOTE } from '../lib/usage'
 
 interface InputPanelProps {
   input: RoutingInput
@@ -13,7 +14,7 @@ interface InputPanelProps {
 export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimize }: InputPanelProps) {
   const patch = <K extends keyof RoutingInput>(key: K, value: RoutingInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }))
-  const number = (key: keyof Pick<RoutingInput, 'monthlyCalls' | 'inputTokensPerCall' | 'outputTokensPerCall' | 'monthlyBudget'>, value: string) =>
+  const number = (key: keyof Pick<RoutingInput, 'monthlyCalls' | 'inputWordsPerCall' | 'outputWordsPerCall' | 'monthlyBudget'>, value: string) =>
     patch(key, Math.max(0, Number(value)))
   const priority = (key: keyof RoutingInput['priorities'], value: string) =>
     setInput((current) => ({ ...current, priorities: { ...current.priorities, [key]: Number(value) } }))
@@ -53,12 +54,13 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
       </label>
 
       <fieldset className="field wide">
-        <legend className="field-index">4. Tokens per call</legend>
-        <span className="field-help">Average tokens per end-to-end call</span>
+        <legend className="field-index">4. Words per call</legend>
+        <span className="field-help">Approximate words per end-to-end call</span>
         <div className="paired-inputs">
-          <label><span>Input</span><input type="number" min="1" value={input.inputTokensPerCall} onChange={(event) => number('inputTokensPerCall', event.target.value)} /></label>
-          <label><span>Output</span><input type="number" min="1" value={input.outputTokensPerCall} onChange={(event) => number('outputTokensPerCall', event.target.value)} /></label>
+          <label><span>Input words</span><input type="number" min="1" value={input.inputWordsPerCall} onChange={(event) => number('inputWordsPerCall', event.target.value)} /></label>
+          <label><span>Output words</span><input type="number" min="1" value={input.outputWordsPerCall} onChange={(event) => number('outputWordsPerCall', event.target.value)} /></label>
         </div>
+        <span className="field-help word-estimate-note">{WORD_USAGE_ESTIMATE_NOTE}</span>
       </fieldset>
 
       <div className="paired-inputs major-pair">

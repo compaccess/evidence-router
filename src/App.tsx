@@ -4,6 +4,7 @@ import { ResultPanel } from './components/ResultPanel'
 import { MODEL_CATALOG } from './data/models'
 import { PRESETS } from './data/presets'
 import { optimizeRoute } from './lib/router'
+import { buildUsageEstimation } from './lib/usage'
 import type { RoutingInput } from './types'
 
 export default function App() {
@@ -20,7 +21,7 @@ export default function App() {
   }
 
   const copyDecision = async () => {
-    await navigator.clipboard.writeText(JSON.stringify({ input, recommendation: result }, null, 2))
+    await navigator.clipboard.writeText(JSON.stringify({ input, usageEstimation: buildUsageEstimation(input), recommendation: result }, null, 2))
     setCopied(true)
     window.setTimeout(() => setCopied(false), 1600)
   }
