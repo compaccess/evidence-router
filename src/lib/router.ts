@@ -7,6 +7,7 @@ import type {
   RoutingInput,
   RoutingResult,
 } from '../types'
+import { normalizePriorities } from './priorities'
 
 interface Candidate {
   allocations: Allocation[]
@@ -85,13 +86,12 @@ function enumerateAllocations(models: ModelProfile[]): Allocation[][] {
 }
 
 function scoreCandidate(input: RoutingInput, forecast: Forecast, maxLatency: number): number {
-  const total = input.priorities.quality + input.priorities.cost + input.priorities.speed || 1
+  const priorities = normalizePriorities(input.priorities)
   const quality = forecast.passRate
   const cost = forecast.savingsPercent / 100
   const speed = Math.max(0, 1 - forecast.latencyMs / maxLatency)
   return round(
-    (input.priorities.quality * quality + input.priorities.cost * cost + input.priorities.speed * speed) /
-      total,
+    priorities.quality * quality + priorities.cost * cost + priorities.speed * speed,
     6,
   )
 }
@@ -109,15 +109,22 @@ function getParetoFrontier(candidates: Candidate[], selected: Candidate): Pareto
       ),
   )
 
-  return frontier
-    .sort((a, b) => a.forecast.monthlyCost - b.forecast.monthlyCost)
-    .filter((_, index, all) => index === 0 || index === all.length - 1 || index % 2 === 0)
-    .map((candidate) => ({
+  const sortedFrontier = frontier.sort((a, b) => a.forecast.monthlyCost - b.forecast.monthlyCost)
+  const visibleFrontier = sortedFrontier.filter(
+    (candidate, index, all) => candidate === selected || index === 0 || index === all.length - 1 || index % 2 === 0,
+  )
+  const toPoint = (candidate: Candidate, onFrontier: boolean): ParetoPoint => ({
       monthlyCost: candidate.forecast.monthlyCost,
       passRate: candidate.forecast.passRate,
       latencyMs: candidate.forecast.latencyMs,
+      utility: candidate.utility,
       selected: candidate.allocations === selected.allocations,
-    }))
+      onFrontier,
+    })
+  const points = visibleFrontier.map((candidate) => toPoint(candidate, true))
+
+  if (!frontier.includes(selected)) points.push(toPoint(selected, false))
+  return points
 }
 
 function buildEvidence(

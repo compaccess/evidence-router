@@ -1,5 +1,6 @@
 import { Check, Copy, TriangleAlert } from 'lucide-react'
 import type { ModelProfile, RoutingInput, RoutingResult } from '../types'
+import { normalizePriorities } from '../lib/priorities'
 import { ParetoChart } from './ParetoChart'
 import { PortfolioBar } from './PortfolioBar'
 
@@ -7,6 +8,7 @@ const usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD',
 
 export function ResultPanel({ input, result, models, copied, onCopy }: { input: RoutingInput; result: RoutingResult; models: ModelProfile[]; copied: boolean; onCopy: () => void }) {
   const feasible = result.status === 'feasible'
+  const priorities = normalizePriorities(input.priorities)
   return (
     <main className="result-panel" id="results">
       <section className="result-section portfolio-section">
@@ -35,9 +37,12 @@ export function ResultPanel({ input, result, models, copied, onCopy }: { input: 
 
       <section className="analysis-grid">
         <div>
-          <h3>Pareto frontier <span>(cost vs. pass rate)</span></h3>
-          <p className="subcopy">Every point is a non-dominated portfolio.</p>
-          <ParetoChart points={result.paretoFrontier} />
+          <h3>Decision frontier <span>(cost vs. pass rate)</span></h3>
+          <p className="subcopy">The frontier shows available trade-offs. Priorities rerank the alternatives in real time.</p>
+          <output className="optimization-state" aria-live="polite">
+            Recomputed for Quality {Math.round(priorities.quality * 100)}% · Cost {Math.round(priorities.cost * 100)}% · Latency {Math.round(priorities.speed * 100)}%
+          </output>
+          <ParetoChart points={result.paretoFrontier} priorities={input.priorities} />
         </div>
         <div className="frontier-summary">
           <h3>Frontier summary</h3>
