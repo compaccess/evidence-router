@@ -57,8 +57,8 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
         <legend className="field-index">4. Words per call</legend>
         <span className="field-help">Approximate words per end-to-end call</span>
         <div className="paired-inputs">
-          <label><span>Input words</span><input type="number" min="0" value={input.inputWordsPerCall} onChange={(event) => number('inputWordsPerCall', event.target.value)} /></label>
-          <label><span>Output words</span><input type="number" min="0" value={input.outputWordsPerCall} onChange={(event) => number('outputWordsPerCall', event.target.value)} /></label>
+          <label><span>Input words</span><input type="number" min="1" value={input.inputWordsPerCall} onChange={(event) => number('inputWordsPerCall', event.target.value)} /></label>
+          <label><span>Output words</span><input type="number" min="1" value={input.outputWordsPerCall} onChange={(event) => number('outputWordsPerCall', event.target.value)} /></label>
         </div>
         <span className="field-help word-estimate-note">{WORD_USAGE_ESTIMATE_NOTE}</span>
       </fieldset>

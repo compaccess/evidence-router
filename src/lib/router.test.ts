@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { MODEL_CATALOG } from '../data/models'
 import { normalizePriorities } from './priorities'
 import { forecastPortfolio, optimizeRoute } from './router'
-import * as routing from './router'
+import { estimateTokensFromWords } from './usage'
 import type { RoutingInput } from '../types'
 
 const baseInput: RoutingInput = {
@@ -49,14 +49,10 @@ describe('forecastPortfolio', () => {
 })
 
 describe('word usage estimation', () => {
-  const estimateTokensFromWords = (routing as unknown as {
-    estimateTokensFromWords?: (words: number) => number
-  }).estimateTokensFromWords
-
   it('converts words with the shared planning estimate', () => {
-    expect(estimateTokensFromWords?.(0)).toBe(0)
-    expect(estimateTokensFromWords?.(750)).toBe(1_000)
-    expect(estimateTokensFromWords?.(188)).toBe(251)
+    expect(estimateTokensFromWords(0)).toBe(0)
+    expect(estimateTokensFromWords(750)).toBe(1_000)
+    expect(estimateTokensFromWords(188)).toBe(251)
   })
 })
 

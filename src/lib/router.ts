@@ -10,8 +10,6 @@ import type {
 import { normalizePriorities } from './priorities'
 import { estimateTokensFromWords } from './usage'
 
-export { estimateTokensFromWords } from './usage'
-
 interface Candidate {
   allocations: Allocation[]
   forecast: Forecast
