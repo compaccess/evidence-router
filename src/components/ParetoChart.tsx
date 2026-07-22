@@ -41,7 +41,7 @@ export function ParetoChart({ points, priorities }: { points: ParetoPoint[]; pri
       className="pareto-chart"
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label={`Cost versus pass-rate decision frontier. Priorities: Quality ${percentages.quality}%, Cost ${percentages.cost}%, Latency ${percentages.speed}%.`}
+      aria-label={`Cost versus pass-rate decision frontier. Input weights: Quality ${priorities.quality}, Cost ${priorities.cost}, Latency ${priorities.speed}. Normalized priorities: Quality ${percentages.quality}%, Cost ${percentages.cost}%, Latency ${percentages.speed}%.`}
       data-priority-signature={prioritySignature}
     >
       <g className="priority-mix" aria-label="Normalized decision priorities">
@@ -51,7 +51,7 @@ export function ParetoChart({ points, priorities }: { points: ParetoPoint[]; pri
         <rect x={mixX + qualityWidth} y="22" width={costWidth} height="10" className="priority-cost" />
         <rect x={mixX + qualityWidth + costWidth} y="22" width={mixWidth * normalized.speed} height="10" rx="2" className="priority-speed" />
         <text x={mixX} y="46" className="chart-label priority-values">
-          Q {percentages.quality}% · C {percentages.cost}% · L {percentages.speed}%
+          INPUT {priorities.quality}/{priorities.cost}/{priorities.speed} · MIX Q {percentages.quality}% · C {percentages.cost}% · L {percentages.speed}%
         </text>
         <g transform={`translate(${width - pad.right - 160} 22)`} className="chart-legend">
           <circle cx="4" cy="5" r="4" className="frontier-point" />

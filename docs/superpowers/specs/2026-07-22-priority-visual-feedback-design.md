@@ -26,7 +26,7 @@ Changing cost or pass-rate coordinates in response to preference weights would m
 
 The selected approach keeps cost/pass-rate geometry correct while adding three priority-driven signals:
 
-1. An in-chart priority-mix bar and normalized values update on every slider change.
+1. An in-chart priority-mix bar shows both raw inputs and normalized values, so every slider change remains visible even when the normalized ratio is unchanged.
 2. Frontier points visually encode their current utility, so priority changes rerank the alternatives even when the winner stays the same.
 3. The selected route is rendered explicitly and last, including when it is not part of the cost-quality frontier.
 
@@ -40,7 +40,7 @@ The chart will receive the current priorities. It will normalize them using the 
 
 ## Rendered behavior
 
-The chart will be labeled as a feasible frontier plus selected route. A compact priority-mix strip inside the SVG will show Quality, Cost, and Latency with distinct colors and normalized percentages. Its segment widths and accessible label will change for every priority input change.
+The chart will be labeled as a feasible frontier plus selected route. A compact priority-mix strip inside the SVG will show raw Quality/Cost/Latency inputs alongside distinct colors and normalized percentages. The raw input text changes for every slider movement, including scale-invariant changes such as `100/0/0` to `50/0/0` where the normalized mix remains the same.
 
 Frontier points will expose current utility through opacity and radius. The selected route will use a high-contrast ring and a text label. A legend will distinguish frontier alternatives from the recommendation.
 
@@ -61,6 +61,7 @@ The surrounding copy will state that the frontier geometry represents available 
 - Change Quality from 50 to 60 while leaving all other inputs fixed.
 - Assert that the chart's priority signature changes.
 - Assert that the rendered chart screenshot changes even though the selected portfolio and forecast metrics remain stable.
+- Set Cost and Latency to zero, change Quality from 100 to 50, and assert the screenshot still changes even though the normalized mix is unchanged.
 - Change to an extreme quality-first mix and confirm the selected route and forecast update.
 
 ### Existing gates
@@ -68,7 +69,7 @@ The surrounding copy will state that the frontier geometry represents available 
 - Run the complete Vitest suite.
 - Run the production build.
 - Run the visual QA script at desktop and mobile sizes.
-- Check for runtime console errors, excluding no application errors as acceptable.
+- Confirm there are no application runtime errors.
 
 ## Scope boundaries
 

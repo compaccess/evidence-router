@@ -40,7 +40,7 @@ export function ResultPanel({ input, result, models, copied, onCopy }: { input: 
           <h3>Decision frontier <span>(cost vs. pass rate)</span></h3>
           <p className="subcopy">The frontier shows available trade-offs. Priorities rerank the alternatives in real time.</p>
           <output className="optimization-state" aria-live="polite">
-            Recomputed for Quality {Math.round(priorities.quality * 100)}% · Cost {Math.round(priorities.cost * 100)}% · Latency {Math.round(priorities.speed * 100)}%
+            Input Q/C/L {input.priorities.quality}/{input.priorities.cost}/{input.priorities.speed} · normalized to {Math.round(priorities.quality * 100)}%/{Math.round(priorities.cost * 100)}%/{Math.round(priorities.speed * 100)}%
           </output>
           <ParetoChart points={result.paretoFrontier} priorities={input.priorities} />
         </div>

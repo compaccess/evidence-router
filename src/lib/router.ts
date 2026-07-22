@@ -114,13 +114,13 @@ function getParetoFrontier(candidates: Candidate[], selected: Candidate): Pareto
     (candidate, index, all) => candidate === selected || index === 0 || index === all.length - 1 || index % 2 === 0,
   )
   const toPoint = (candidate: Candidate, onFrontier: boolean): ParetoPoint => ({
-      monthlyCost: candidate.forecast.monthlyCost,
-      passRate: candidate.forecast.passRate,
-      latencyMs: candidate.forecast.latencyMs,
-      utility: candidate.utility,
-      selected: candidate.allocations === selected.allocations,
-      onFrontier,
-    })
+    monthlyCost: candidate.forecast.monthlyCost,
+    passRate: candidate.forecast.passRate,
+    latencyMs: candidate.forecast.latencyMs,
+    utility: candidate.utility,
+    selected: candidate.allocations === selected.allocations,
+    onFrontier,
+  })
   const points = visibleFrontier.map((candidate) => toPoint(candidate, true))
 
   if (!frontier.includes(selected)) points.push(toPoint(selected, false))
