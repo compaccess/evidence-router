@@ -9,7 +9,7 @@
 ## What it returns
 
 - A weighted model allocation for the selected workflow
-- Projected monthly API cost from call and token volume
+- Projected monthly API cost from call and estimated word volume
 - Savings against an all-frontier baseline
 - Expected pass rate and latency
 - Budget and quality constraint checks
@@ -21,6 +21,8 @@ The application ships with three runnable scenarios: customer support, research,
 ## How the router works
 
 The router enumerates one- and two-model portfolios in 10% increments. For each portfolio it forecasts weighted cost, pass rate, and latency, rejects combinations that violate the monthly budget or pass-rate floor, and ranks the remaining routes using the user's normalized quality, cost, and speed priorities.
+
+Users enter approximate input and output words per call. For token-priced cost fixtures, the demo estimates four tokens for every three words and records that assumption in the copied decision JSON; actual tokenization varies by language and model.
 
 If no portfolio satisfies both hard constraints, the router returns the least-violating route and quantifies both shortfalls. It never hides an infeasible request behind an empty result.
 
