@@ -8,6 +8,9 @@ import type {
   RoutingResult,
 } from '../types'
 import { normalizePriorities } from './priorities'
+import { estimateTokensFromWords } from './usage'
+
+export { estimateTokensFromWords } from './usage'
 
 interface Candidate {
   allocations: Allocation[]
@@ -19,8 +22,8 @@ interface Candidate {
 const round = (value: number, digits = 4) => Number(value.toFixed(digits))
 
 function modelMonthlyCost(input: RoutingInput, model: ModelProfile): number {
-  const inputMillions = (input.monthlyCalls * input.inputTokensPerCall) / 1_000_000
-  const outputMillions = (input.monthlyCalls * input.outputTokensPerCall) / 1_000_000
+  const inputMillions = (input.monthlyCalls * estimateTokensFromWords(input.inputWordsPerCall)) / 1_000_000
+  const outputMillions = (input.monthlyCalls * estimateTokensFromWords(input.outputWordsPerCall)) / 1_000_000
   return inputMillions * model.inputPricePerMillion + outputMillions * model.outputPricePerMillion
 }
 

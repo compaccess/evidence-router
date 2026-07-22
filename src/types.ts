@@ -10,8 +10,8 @@ export interface RoutingInput {
   useCase: string
   workflow: Workflow
   monthlyCalls: number
-  inputTokensPerCall: number
-  outputTokensPerCall: number
+  inputWordsPerCall: number
+  outputWordsPerCall: number
   monthlyBudget: number
   passRateFloor: number
   priorities: Priorities

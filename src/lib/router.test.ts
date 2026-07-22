@@ -2,14 +2,15 @@ import { describe, expect, it } from 'vitest'
 import { MODEL_CATALOG } from '../data/models'
 import { normalizePriorities } from './priorities'
 import { forecastPortfolio, optimizeRoute } from './router'
+import * as routing from './router'
 import type { RoutingInput } from '../types'
 
 const baseInput: RoutingInput = {
   useCase: 'Customer-support agent',
   workflow: 'support',
   monthlyCalls: 100_000,
-  inputTokensPerCall: 1_000,
-  outputTokensPerCall: 250,
+  inputWordsPerCall: 750,
+  outputWordsPerCall: 188,
   monthlyBudget: 500,
   passRateFloor: 0.8,
   priorities: { quality: 50, cost: 30, speed: 20 },
@@ -31,7 +32,7 @@ describe('normalizePriorities', () => {
 })
 
 describe('forecastPortfolio', () => {
-  it('calculates token cost and weighted operating metrics', () => {
+  it('estimates token-priced cost from user-entered words', () => {
     const forecast = forecastPortfolio(
       baseInput,
       [
@@ -41,9 +42,21 @@ describe('forecastPortfolio', () => {
       MODEL_CATALOG,
     )
 
-    expect(forecast.monthlyCost).toBeCloseTo(337.5, 1)
+    expect(forecast.monthlyCost).toBeCloseTo(337.85, 1)
     expect(forecast.passRate).toBeCloseTo(0.84, 3)
     expect(forecast.latencyMs).toBeCloseTo(830, 0)
+  })
+})
+
+describe('word usage estimation', () => {
+  const estimateTokensFromWords = (routing as unknown as {
+    estimateTokensFromWords?: (words: number) => number
+  }).estimateTokensFromWords
+
+  it('converts words with the shared planning estimate', () => {
+    expect(estimateTokensFromWords?.(0)).toBe(0)
+    expect(estimateTokensFromWords?.(750)).toBe(1_000)
+    expect(estimateTokensFromWords?.(188)).toBe(251)
   })
 })
 
