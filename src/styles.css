@@ -106,6 +106,7 @@ footer strong { color: #17191e; }
 @media (max-width: 1050px) {
   .workspace { grid-template-columns: 350px minmax(0, 1fr); }
   .result-panel { padding-left: 18px; padding-right: 18px; }
+  .usage-pair { grid-template-columns: 1fr; gap: 8px; }
   .analysis-grid { grid-template-columns: 1fr; }
   .frontier-summary { border-left: 0; border-top: 1px solid var(--rule); padding: 12px 0 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 20px; }
 }

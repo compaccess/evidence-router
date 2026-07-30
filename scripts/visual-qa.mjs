@@ -82,6 +82,18 @@ await page.getByRole('button', { name: /Copy decision JSON/ }).click()
 const copiedText = await page.getByRole('button', { name: /Copied/ }).textContent()
 const copiedDecision = JSON.parse(await page.evaluate(() => navigator.clipboard.readText()))
 
+await page.setViewportSize({ width: 900, height: 900 })
+const tabletUsageBoxes = await page.locator('.usage-pair label').evaluateAll((labels) =>
+  labels.map((label) => {
+    const box = label.getBoundingClientRect()
+    return { x: box.x, y: box.y, width: box.width }
+  }),
+)
+const tabletUsageStacked = tabletUsageBoxes.length === 2 &&
+  Math.abs(tabletUsageBoxes[0].x - tabletUsageBoxes[1].x) < 1 &&
+  tabletUsageBoxes[1].y > tabletUsageBoxes[0].y &&
+  tabletUsageBoxes.every((box) => box.width >= 300)
+
 await page.setViewportSize({ width: 390, height: 844 })
 const mobilePath = 'docs/design/evidence-router-mobile.png'
 await page.screenshot({ path: mobilePath, fullPage: true })
@@ -118,6 +130,7 @@ if (!alternativeLegendBox || !selectedLegendDotBox) throw new Error('Priority ch
 if (alternativeLegendBox.x + alternativeLegendBox.width + 4 > selectedLegendDotBox.x) throw new Error('Priority chart legend entries overlap')
 if (initialCost === researchCost) throw new Error('Preset did not change the forecast')
 if (!copiedText?.includes('Copied')) throw new Error('JSON copy did not reach its success state')
+if (!tabletUsageStacked) throw new Error(`Word inputs are squeezed at the tablet breakpoint: ${JSON.stringify(tabletUsageBoxes)}`)
 if (horizontalOverflow) throw new Error('Mobile viewport has horizontal overflow')
 
-console.log(JSON.stringify({ targetUrl, title, initialCost, researchCost, wordsHeadingVisible, wordEstimateVisible, accessibleUnitLabels, wordUnitsVisible, callsUnitVisible, percentUnitVisible, headingStyles, invalidWordState, invalidWordMessage, restoredInputWords, wordCostBefore, wordCostWhileInvalid, wordCostAfter, initialPrioritySignature, qualityPrioritySignature, costPrioritySignature, latencyPrioritySignature, adjustedQuality, copiedText, horizontalOverflow, desktopPath, mobilePath }, null, 2))
+console.log(JSON.stringify({ targetUrl, title, initialCost, researchCost, wordsHeadingVisible, wordEstimateVisible, accessibleUnitLabels, wordUnitsVisible, callsUnitVisible, percentUnitVisible, headingStyles, invalidWordState, invalidWordMessage, restoredInputWords, wordCostBefore, wordCostWhileInvalid, wordCostAfter, initialPrioritySignature, qualityPrioritySignature, costPrioritySignature, latencyPrioritySignature, adjustedQuality, copiedText, tabletUsageBoxes, tabletUsageStacked, horizontalOverflow, desktopPath, mobilePath }, null, 2))

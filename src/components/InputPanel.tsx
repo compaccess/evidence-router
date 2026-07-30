@@ -139,7 +139,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
       <fieldset className="field wide">
         <legend className="field-index">4. Words per call</legend>
         <span className="field-help">Approximate request and response size</span>
-        <div className="paired-inputs">
+        <div className="paired-inputs usage-pair">
           <label>
             <span className="subfield-label">Input</span>
             <BoundedNumberInput
