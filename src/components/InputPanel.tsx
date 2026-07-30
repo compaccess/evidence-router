@@ -130,7 +130,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
         <BoundedNumberInput
           value={input.monthlyCalls}
           onValueChange={(value) => patch('monthlyCalls', value)}
-          ariaLabel="Monthly volume"
+          ariaLabel="Monthly volume, calls per month"
           min={1}
           suffix="calls / month"
         />
@@ -145,7 +145,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
             <BoundedNumberInput
               value={input.inputWordsPerCall}
               onValueChange={(value) => patch('inputWordsPerCall', value)}
-              ariaLabel="Input words"
+              ariaLabel="Input words per call"
               min={1}
               suffix="words / call"
             />
@@ -155,7 +155,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
             <BoundedNumberInput
               value={input.outputWordsPerCall}
               onValueChange={(value) => patch('outputWordsPerCall', value)}
-              ariaLabel="Output words"
+              ariaLabel="Output words per call"
               min={1}
               suffix="words / call"
             />
@@ -171,7 +171,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
           <BoundedNumberInput
             value={input.monthlyBudget}
             onValueChange={(value) => patch('monthlyBudget', value)}
-            ariaLabel="Monthly budget"
+            ariaLabel="Monthly budget, US dollars per month"
             min={1}
             prefix="$"
             suffix="/ month"
@@ -183,7 +183,7 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
           <BoundedNumberInput
             value={Math.round(input.passRateFloor * 100)}
             onValueChange={(value) => patch('passRateFloor', value / 100)}
-            ariaLabel="Minimum pass rate"
+            ariaLabel="Minimum pass rate, percent"
             min={1}
             max={100}
             suffix="%"
