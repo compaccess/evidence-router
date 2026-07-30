@@ -1,3 +1,4 @@
+import { useEffect, useId, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { RoutingInput, Workflow } from '../types'
 import { PRESETS } from '../data/presets'
@@ -11,11 +12,87 @@ interface InputPanelProps {
   onOptimize: () => void
 }
 
+interface BoundedNumberInputProps {
+  value: number
+  onValueChange: (value: number) => void
+  ariaLabel: string
+  min: number
+  max?: number
+  prefix?: string
+  suffix: string
+}
+
+function BoundedNumberInput({
+  value,
+  onValueChange,
+  ariaLabel,
+  min,
+  max,
+  prefix,
+  suffix,
+}: BoundedNumberInputProps) {
+  const [draft, setDraft] = useState(String(value))
+  const errorId = useId()
+  const parsed = Number(draft)
+  const isEmpty = draft.trim() === ''
+  const isFinite = Number.isFinite(parsed)
+  const isBelowMin = isFinite && parsed < min
+  const isAboveMax = isFinite && max !== undefined && parsed > max
+  const isInvalid = isEmpty || !isFinite || isBelowMin || isAboveMax
+  const error = isEmpty || !isFinite
+    ? 'Enter a number.'
+    : isBelowMin
+      ? `Use ${min} or more.`
+      : isAboveMax
+        ? `Use ${max} or less.`
+        : ''
+
+  useEffect(() => {
+    setDraft(String(value))
+  }, [value])
+
+  const update = (nextDraft: string) => {
+    setDraft(nextDraft)
+    const nextValue = Number(nextDraft)
+    if (
+      nextDraft.trim() !== '' &&
+      Number.isFinite(nextValue) &&
+      nextValue >= min &&
+      (max === undefined || nextValue <= max)
+    ) {
+      onValueChange(nextValue)
+    }
+  }
+
+  return (
+    <>
+      <span className={`number-control${isInvalid ? ' invalid' : ''}`}>
+        {prefix && <span className="number-affix" aria-hidden="true">{prefix}</span>}
+        <input
+          type="number"
+          min={min}
+          max={max}
+          step="1"
+          inputMode="numeric"
+          value={draft}
+          aria-label={ariaLabel}
+          aria-invalid={isInvalid}
+          aria-describedby={isInvalid ? errorId : undefined}
+          onChange={(event) => update(event.target.value)}
+          onBlur={() => {
+            if (isInvalid) setDraft(String(value))
+          }}
+        />
+        <span className="number-affix suffix" aria-hidden="true">{suffix}</span>
+      </span>
+      {isInvalid && <span className="field-error" id={errorId} role="alert">{error}</span>}
+    </>
+  )
+}
+
 export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimize }: InputPanelProps) {
   const patch = <K extends keyof RoutingInput>(key: K, value: RoutingInput[K]) =>
     setInput((current) => ({ ...current, [key]: value }))
-  const number = (key: keyof Pick<RoutingInput, 'monthlyCalls' | 'inputWordsPerCall' | 'outputWordsPerCall' | 'monthlyBudget'>, value: string) =>
-    patch(key, Math.max(0, Number(value)))
   const priority = (key: keyof RoutingInput['priorities'], value: string) =>
     setInput((current) => ({ ...current, priorities: { ...current.priorities, [key]: Number(value) } }))
 
@@ -50,15 +127,39 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
       <label className="field wide">
         <span className="field-index">3. Monthly volume</span>
         <span className="field-help">Estimated calls per month</span>
-        <input type="number" min="1" value={input.monthlyCalls} onChange={(event) => number('monthlyCalls', event.target.value)} />
+        <BoundedNumberInput
+          value={input.monthlyCalls}
+          onValueChange={(value) => patch('monthlyCalls', value)}
+          ariaLabel="Monthly volume"
+          min={1}
+          suffix="calls / month"
+        />
       </label>
 
       <fieldset className="field wide">
         <legend className="field-index">4. Words per call</legend>
-        <span className="field-help">Approximate words per end-to-end call</span>
+        <span className="field-help">Approximate request and response size</span>
         <div className="paired-inputs">
-          <label><span>Input words</span><input type="number" min="1" value={input.inputWordsPerCall} onChange={(event) => number('inputWordsPerCall', event.target.value)} /></label>
-          <label><span>Output words</span><input type="number" min="1" value={input.outputWordsPerCall} onChange={(event) => number('outputWordsPerCall', event.target.value)} /></label>
+          <label>
+            <span className="subfield-label">Input</span>
+            <BoundedNumberInput
+              value={input.inputWordsPerCall}
+              onValueChange={(value) => patch('inputWordsPerCall', value)}
+              ariaLabel="Input words"
+              min={1}
+              suffix="words / call"
+            />
+          </label>
+          <label>
+            <span className="subfield-label">Output</span>
+            <BoundedNumberInput
+              value={input.outputWordsPerCall}
+              onValueChange={(value) => patch('outputWordsPerCall', value)}
+              ariaLabel="Output words"
+              min={1}
+              suffix="words / call"
+            />
+          </label>
         </div>
         <span className="field-help word-estimate-note">{WORD_USAGE_ESTIMATE_NOTE}</span>
       </fieldset>
@@ -67,12 +168,26 @@ export function InputPanel({ input, setInput, selectedPreset, onPreset, onOptimi
         <label className="field">
           <span className="field-index">5. Monthly budget</span>
           <span className="field-help">USD hard limit</span>
-          <input type="number" min="1" value={input.monthlyBudget} onChange={(event) => number('monthlyBudget', event.target.value)} />
+          <BoundedNumberInput
+            value={input.monthlyBudget}
+            onValueChange={(value) => patch('monthlyBudget', value)}
+            ariaLabel="Monthly budget"
+            min={1}
+            prefix="$"
+            suffix="/ month"
+          />
         </label>
         <label className="field">
           <span className="field-index">6. Min. pass rate</span>
           <span className="field-help">Quality floor (%)</span>
-          <input type="number" min="1" max="100" value={Math.round(input.passRateFloor * 100)} onChange={(event) => patch('passRateFloor', Number(event.target.value) / 100)} />
+          <BoundedNumberInput
+            value={Math.round(input.passRateFloor * 100)}
+            onValueChange={(value) => patch('passRateFloor', value / 100)}
+            ariaLabel="Minimum pass rate"
+            min={1}
+            max={100}
+            suffix="%"
+          />
         </label>
       </div>
 
